@@ -5,8 +5,8 @@ import requests
 from tests.utils import load_schema
 
 
-def test_get_single_user_successfully():
-    url = 'https://reqres.in/api/users/2'
+def test_get_single_user_successfully(url):
+    url = f'{url}/users/2'
     schema = load_schema('get_single_user.json')
 
     result = requests.get(url)
@@ -16,26 +16,26 @@ def test_get_single_user_successfully():
 
 
 @pytest.mark.parametrize('id_', [1, 2, 3])
-def test_get_single_user_id(id_):
-    url = f"https://reqres.in/api/users/{id_}"
-
+def test_get_single_user_id(url, id_):
+    url = f'{url}/users/{id_}'
     result = requests.get(url)
+
     assert result.json()['data']['id'] == id_
 
 
-def test_list_of_users_pagination():
+def test_list_of_users_pagination(url):
     page = 2
-    url = "https://reqres.in/api/users"
+    url = f'{url}/users'
 
     result = requests.get(url, params={"page": page})
 
     assert result.json()["page"] == page
 
 
-def test_list_of_users_per_page():
+def test_list_of_users_per_page(url):
     page = 2
     per_page = 6
-    url = "https://reqres.in/api/users"
+    url = f'{url}/users'
 
     result = requests.get(
         url=url,
@@ -46,15 +46,15 @@ def test_list_of_users_per_page():
     assert len(result.json()['data']) == per_page
 
 
-def test_delete_user():
-    url = 'https://reqres.in/api/users/2'
+def test_delete_user(url):
+    url = f'{url}/users/2'
     result = requests.delete(url)
 
     assert result.status_code == 204
 
 
-def test_create_user():
-    url = 'https://reqres.in/api/users'
+def test_create_user(url):
+    url = f'{url}/users'
     schema = load_schema('create_user.json')
 
     result = requests.post(url,
@@ -69,8 +69,8 @@ def test_create_user():
     jsonschema.validate(result.json(), schema)
 
 
-def test_put_update_user():
-    url = 'https://reqres.in/api/users/2'
+def test_put_update_user(url):
+    url = f'{url}/users/2'
     schema = load_schema('put_apdate.json')
     result = requests.put(url,
                           {
@@ -84,28 +84,20 @@ def test_put_update_user():
     jsonschema.validate(result.json(), schema)
 
 
-def test_get_single_user_not_found():
-    url = "https://reqres.in/api/users/23"
+def test_get_single_user_not_found(url):
+    url = f'{url}/users/23'
     result = requests.get(url)
+
     assert result.status_code == 404
     assert result.json() == {}
 
 
-def test_get_register_unsuccessful():
-        url = 'https://reqres.in/api/register'
-        schema = load_schema('register_user.json')
+def test_get_register_unsuccessful(url):
+    url = f'{url}/register'
+    result = requests.post(url,
+                           json={
+                               "email": "eve.holt@reqres.in"
+                           })
 
-        result = requests.post(url,
-                               json={
-                                   "email": "eve.holt@reqres.in"
-                               })
-
-        assert result.status_code == 400
-        assert result.json()['error'] == 'Missing password'
-
-
-
-
-
-
-
+    assert result.status_code == 400
+    assert result.json()['error'] == 'Missing password'
